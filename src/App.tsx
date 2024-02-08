@@ -1,32 +1,6 @@
 import {ReactNode, useState} from "react";
 import './page.css'
-    function SearchBar({handleChange,message,checked}:{handleChange:React.ChangeEventHandler,message:string,checked:boolean}) {
-
-        return (
-            <form id={"search"}>
-                <table>
-                    <tbody>
-                    <tr>
-                        <td>
-                            <input onChange={handleChange} id={"searchBar"} type={"text"} value={message}
-                                   placeholder={"Search..."}/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label>
-                                <input type={"checkbox"} id={"checkBox"} checked={checked}/>
-                                {' '}
-                                Only show products in stock
-                            </label>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-
-            </form>
-        );
-    }
+import SearchBar from "./Appcomponents/filter";
 
 function CategoryRow(category: string) {
     return (
@@ -45,25 +19,60 @@ function GetCategories() {
     })
     return categories;
 }
+function Error(){
+    return(
+        <tr key={""}>
+            <td key={""} className={"isNotStocked"}>No such product found</td>
+        </tr>
+    )
+}
+
 // @ts-ignore
-function ProductCategoryRow({message}){
+function BuildOutputList({message,checked}){
     let lastCategory:string = '';
-    const lalala:ReactNode[] = []
+    const lalala:ReactNode[] = [];
+    const cats:ReactNode[]=[];
+
     GetCategories().forEach((category)=>{
+        const prods:ReactNode[] =[];
         if (category != lastCategory){
-            lalala.push(CategoryRow(category));
+            cats.push(CategoryRow(category));
             lastCategory = category;
         }
         PRODUCTS.forEach((product)=>{
-            if (product.name.toLowerCase().includes(message.toString().trim().toLowerCase())){
-                if (product.category === lastCategory){
-                    lalala.push(ProductRow(product));
+
+            if (!checked){
+                if (product.name.toLowerCase().includes(message.toString().trim().toLowerCase())){
+                    if (product.category === lastCategory){
+                        prods.push(ProductRow(product));
+                    }
                 }
             }
-
-
+            else {
+                if (product.stocked){
+                if (product.name.toLowerCase().includes(message.toString().trim().toLowerCase())){
+                    if (product.category === lastCategory){
+                        prods.push(ProductRow(product));
+                    }
+                }
+                }
+            }
         });
+        if (prods.length === 0){
+            cats.splice(cats.indexOf(category),1);
+        }
+        else {
+            cats.push(prods);
+        }
+
     });
+    if (cats.length===0){
+        lalala.push(Error());
+    }
+    else {
+        lalala.push(cats)
+    }
+
     return(
         <table>
             <tbody>
@@ -102,13 +111,14 @@ export default function Page(){
         setMessage(event.target.value);
         console.log(event.target.value);
     }
-    /*const handleCheck =(event: React.ChangeEvent<Html>)=>{
-
-    }*/
+    const handleCheck = ()=>{
+        setChecked(!checked);
+        console.log(checked)
+    }
     return(
         <div>
-        <SearchBar handleChange={handleChange} message={message} checked={checked}/>
-        <ProductCategoryRow message={message}/>
+        <SearchBar handleChange={handleChange} message={message} checked={checked} handleCheck={handleCheck}/>
+        <BuildOutputList message={message} checked={checked}/>
         </div>
     )
 }
