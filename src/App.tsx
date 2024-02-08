@@ -1,37 +1,42 @@
-import {ReactNode} from "react";
+import {ReactNode, useState} from "react";
+import './page.css'
+    function SearchBar({handleChange,message,checked}:{handleChange:React.ChangeEventHandler,message:string,checked:boolean}) {
 
-function SearchBar(){
-    return (
-        <form id={"search"}>
-            <table>
-                <tbody>
-                <tr>
-                    <td>
-                        <input type={"text"} placeholder={"Search..."}/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label>
-                            <input type={"checkbox"}/>
-                            {' '}
-                            Only show products in stock
-                        </label>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        return (
+            <form id={"search"}>
+                <table>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <input onChange={handleChange} id={"searchBar"} type={"text"} value={message}
+                                   placeholder={"Search..."}/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>
+                                <input type={"checkbox"} id={"checkBox"} checked={checked}/>
+                                {' '}
+                                Only show products in stock
+                            </label>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
 
-        </form>
-    );
-}
+            </form>
+        );
+    }
 
 function CategoryRow(category: string) {
     return (
-        <th key={category}>{category}:</th>
+        <tr key={category}>
+            <td className={"category"} key={category}>{category}:</td>
+        </tr>
     )
 }
-function GetCategories(){
+
+function GetCategories() {
     const categories: string[] =[];
     PRODUCTS.forEach((product)=>{
         if (!categories.includes(product.category)){
@@ -40,7 +45,8 @@ function GetCategories(){
     })
     return categories;
 }
-function ProductCategoryRow(){
+// @ts-ignore
+function ProductCategoryRow({message}){
     let lastCategory:string = '';
     const lalala:ReactNode[] = []
     GetCategories().forEach((category)=>{
@@ -49,9 +55,12 @@ function ProductCategoryRow(){
             lastCategory = category;
         }
         PRODUCTS.forEach((product)=>{
-            if (product.category === lastCategory){
-                lalala.push(ProductRow(product));
+            if (product.name.toLowerCase().includes(message.toString().trim().toLowerCase())){
+                if (product.category === lastCategory){
+                    lalala.push(ProductRow(product));
+                }
             }
+
 
         });
     });
@@ -69,12 +78,12 @@ function ProductCategoryRow(){
             {lalala}
             </tbody>
         </table>
-    )
+)
 }
 
 function ProductRow(product:Product){
     if (!product.stocked) {
-        return <tr key={product.name}>
+        return <tr key={product.name} className={"isNotStocked"}>
             <td>{product.name}</td>
             <td>{product.price}</td>
         </tr>
@@ -85,17 +94,25 @@ function ProductRow(product:Product){
             <td>{product.price}</td></tr>
     )
 }
-function Page(){
+export default function Page(){
+    const [message,setMessage] =useState('')
+    const [checked,setChecked] = useState(false);
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>)=>{
+        setMessage(event.target.value);
+        console.log(event.target.value);
+    }
+    /*const handleCheck =(event: React.ChangeEvent<Html>)=>{
+
+    }*/
     return(
-        <body>
-        <SearchBar/>
-        <ProductCategoryRow/>
-        </body>
+        <div>
+        <SearchBar handleChange={handleChange} message={message} checked={checked}/>
+        <ProductCategoryRow message={message}/>
+        </div>
     )
 }
-export default function Home(){
-    return <Page/>
-}
+
 
 interface Product{
     category:string;
