@@ -1,7 +1,7 @@
 import {useState} from "react";
 import './page.css';
-import SearchBar from './Appcomponents/filter';
 import ContentTable from './Appcomponents/content.table';
+import SearchBar from "./Appcomponents/filter";
 
 
 
